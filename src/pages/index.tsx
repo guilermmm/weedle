@@ -101,10 +101,26 @@ const Home = () => {
             </div>
           )}
           <div className="w-36 pl-14 flex flex-col gap-2">
-            <button className="flex justify-center items-center gap-2 rounded-lg border-[#421856] border-r-4 border-b-4 bg-white p-1">
-              <Image width={28} height={28} src="/chatot_head.png" alt="chatot" />
-              <Image width={28} height={28} src="/sound.png" alt="sound" />
-            </button>
+            {!pokemon.isLoading && (
+              <div>
+                <audio id="audio">
+                  <source
+                    src={`https://pokemoncries.com/cries-old/${pkmnIdx}.mp3`}
+                    type="audio/mpeg"
+                  />
+                </audio>
+                <button
+                  onClick={() => {
+                    const audio = document.getElementById("audio") as HTMLAudioElement;
+                    audio.play();
+                  }}
+                  className="flex justify-center items-center gap-2 rounded-lg border-[#421856] border-r-4 border-b-4 bg-white p-1"
+                >
+                  <Image width={28} height={28} src="/chatot_head.png" alt="chatot" />
+                  <Image width={28} height={28} src="/sound.png" alt="sound" />
+                </button>
+              </div>
+            )}
             <div>
               {guesses.map((guess, index) =>
                 guess !== null ? (
@@ -174,7 +190,7 @@ const Home = () => {
           </form>
         </div>
 
-        <div className="text-red-500">{error}</div>
+        <div className="text-red-300 font-bold">{error}</div>
 
         <div className="flex flex-col items-center justify-center">
           <div className="flex flex-row gap-1 items-center justify-center">
