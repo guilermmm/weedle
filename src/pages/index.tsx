@@ -1,118 +1,228 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
+import Image from "next/image";
+import {
+  cn,
+  randomPokemonFromGen,
+  type Pokemon,
+  type PokemonComparisonResult,
+  comparePokemonValues,
+} from "../lib/utils";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import Tip from "@/components/Tip";
 
-const inter = Inter({ subsets: ['latin'] })
+const Home = () => {
+  const [pkmnIdx, setPkmnIdx] = useState(randomPokemonFromGen(1));
 
-export default function Home() {
+  const pokemon = useQuery({
+    queryFn: async () => {
+      const result = await axios.get<Pokemon>(`https://pokeapi.co/api/v2/pokemon/${pkmnIdx}`);
+
+      return result.data;
+    },
+    queryKey: ["pokemon", pkmnIdx],
+  });
+
+  const [input, setInput] = useState("");
+  const [error, setError] = useState("");
+
+  type Guess = { pokemon: Pokemon; comparison: PokemonComparisonResult } | null;
+
+  const [guesses, setGuesses] = useState<[Guess, Guess, Guess, Guess, Guess, Guess]>([
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+  ]);
+
+  const guessedCorrectly = guesses.some(g => g !== null && g.comparison.pokemon);
+
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/pages/index.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="h-screen flex flex-col">
+      <nav className="bg-[#FD1B54] h-20 border-b-[20px] border-[#421856] w-full grid grid-cols-3">
+        <div className="flex ">
+          <button className="pl-4">
+            <Image src="/button_big.png" alt="Botão principal" width={48} height={48} />
+          </button>
+          <button className="pl-4 flex items-center">
+            <Image src="/button_red.png" alt="Botão vermelho" width={20} height={20} />
+            <div className="font-bold pl-1">Classic</div>
+          </button>
+          <button className="pl-4 flex items-center">
+            <Image src="/button_yellow.png" alt="Botão amarelo" width={20} height={20} />
+            <div className="font-bold pl-1">Journey</div>
+          </button>
+          <button className="pl-4 flex items-center">
+            <Image src="/button_green.png" alt="Botão verde" width={20} height={20} />
+            <div className="font-bold pl-1">Elite</div>
+          </button>
+        </div>
+        <div className="flex items-center justify-center">
+          <div>
+            <Image width={48} height={48} src="/weedle_head.png" alt="weedle head" />
+          </div>
+          <div>
+            <Image width={96} height={48} src="/weedle_name.png" alt="weedle" />
+          </div>
+        </div>
+        <div className="flex items-center justify-end pr-4">
+          <div className="font-bold">Cleitinho borracheiro</div>
+          <Image width={48} height={48} src="/pokemon_trainer.png" alt="pokemon trainer" />
+        </div>
+      </nav>
+
+      <div className="border-b-4 border-x-4 border-[#421856] rounded-b-xl mx-5 mb-5 pt-5 flex flex-col items-center grow">
+        <div className="flex items-center justify-center h-56">
+          <div className="w-40"></div>
+          {pokemon.isLoading ? (
+            <div className="flex items-center ">
+              <Image width={96} height={96} src="/pokeball.png" alt="pokebola" />
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center">
+              <Image
+                width={192}
+                height={192}
+                className="z-0 absolute"
+                src="/screen.png"
+                alt="cabeca"
+              />
+              <Image
+                width={96}
+                height={96}
+                src={pokemon.data?.sprites.other["official-artwork"].front_default!}
+                alt="telinha"
+                className={cn("z-10 pb-8", {
+                  "opacity-0": !guessedCorrectly,
+                })}
+              />
+            </div>
+          )}
+          <div className="w-36 pl-14 flex flex-col gap-2">
+            <button className="flex justify-center items-center gap-2 rounded-lg border-[#421856] border-r-4 border-b-4 bg-white p-1">
+              <Image width={28} height={28} src="/chatot_head.png" alt="chatot" />
+              <Image width={28} height={28} src="/sound.png" alt="sound" />
+            </button>
+            <div>
+              {guesses.map((guess, index) =>
+                guess !== null ? (
+                  <Image
+                    key={index}
+                    width={20}
+                    height={20}
+                    src="/open_pokeball.png"
+                    alt="pokebola aberta"
+                    className="pt-1"
+                  />
+                ) : (
+                  <Image
+                    key={index}
+                    width={20}
+                    height={20}
+                    src="/pokeball.png"
+                    alt="pokebola"
+                    className="pt-2"
+                  />
+                ),
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-4 pb-2">
+          <form
+            className="bg-white w-[420px] flex rounded-xl border-[#421856] border-r-4 border-b-4 px-2 py-1"
+            onSubmit={async e => {
+              e.preventDefault();
+              try {
+                const result = await axios.get<Pokemon>(
+                  `https://pokeapi.co/api/v2/pokemon/${input.trim().toLowerCase()}`,
+                );
+                const guess = result.data;
+
+                const comparison = comparePokemonValues(pokemon.data!, guess);
+
+                setGuesses(g => {
+                  const newGuesses = [...g] as typeof g;
+                  const index = newGuesses.findIndex(g => g === null);
+                  newGuesses[index] = { pokemon: guess, comparison };
+                  return newGuesses;
+                });
+
+                setInput("");
+              } catch (e) {
+                setError("Pokémon não encontrado");
+              }
+            }}
           >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
+            <input
+              className="grow"
+              type="text"
+              value={input}
+              onChange={e => setInput(e.target.value)}
             />
-          </a>
+            <button
+              className="py-1 px-2 gap-1 items-center disabled:opacity-50 flex bg-[#FD1B54] rounded-xl border-[#421856] border-r-4 border-b-4"
+              type="submit"
+              disabled={input.trim() === "" || guesses.every(g => g !== null) || guessedCorrectly}
+            >
+              <Image width={62} height={24} src="/catch.png" alt="catch" />
+              <Image width={28} height={28} src="/alt_pokeball.png" alt="catch" />
+            </button>
+          </form>
+        </div>
+
+        <div className="text-red-500">{error}</div>
+
+        <div className="flex flex-col items-center justify-center">
+          <div className="flex flex-row gap-1 items-center justify-center">
+            <div className="w-20 font-bold text-sm text-center">Pokémon</div>
+            <div className="w-20 font-bold text-sm text-center">Nº Pokédex</div>
+            <div className="w-20 font-bold text-sm text-center">Tipo(s)</div>
+            <div className="w-20 font-bold text-sm text-center">Peso</div>
+            <div className="w-20 font-bold text-sm text-center">Altura</div>
+          </div>
+
+          <div className="flex pb-4 flex-col gap-1 items-center justify-center">
+            {guesses.map((guess, i) => (
+              <div className="flex gap-1 flex-row items-center justify-center" key={i}>
+                {guess === null ? (
+                  <>
+                    <Tip boolean={false} />
+                    <Tip boolean={false} />
+                    <Tip boolean={false} />
+                    <Tip boolean={false} />
+                    <Tip boolean={false} />
+                  </>
+                ) : (
+                  <>
+                    <Tip boolean={guess.comparison.pokemon}>
+                      <Image
+                        width={96}
+                        height={96}
+                        src={guess.pokemon.sprites.other["official-artwork"].front_default!}
+                        alt="pokemon"
+                      />
+                    </Tip>
+                    <Tip number={guess.comparison.index}>{guess.pokemon.id}</Tip>
+                    <Tip type={guess.comparison.types}>
+                      {guess.pokemon.types.map(t => (
+                        <div key={t.type.name}>{t.type.name}</div>
+                      ))}
+                    </Tip>
+                    <Tip number={guess.comparison.weight}>{guess.pokemon.weight / 10}kg</Tip>
+                    <Tip number={guess.comparison.height}>{guess.pokemon.height / 10}m</Tip>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
+    </div>
+  );
+};
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
-}
+export default Home;
