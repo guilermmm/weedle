@@ -174,7 +174,7 @@ const Home = () => {
             }}
           >
             <input
-              className="grow"
+              className="grow px-2 outline-none"
               type="text"
               value={input}
               onChange={e => setInput(e.target.value)}
@@ -196,9 +196,9 @@ const Home = () => {
           <div className="flex flex-row gap-1 items-center justify-center">
             <div className="w-20 font-bold text-sm text-center">Pokémon</div>
             <div className="w-20 font-bold text-sm text-center">Nº Pokédex</div>
-            <div className="w-20 font-bold text-sm text-center">Tipo(s)</div>
-            <div className="w-20 font-bold text-sm text-center">Peso</div>
-            <div className="w-20 font-bold text-sm text-center">Altura</div>
+            <div className="w-20 font-bold text-sm text-center">Type(s)</div>
+            <div className="w-20 font-bold text-sm text-center">Weight</div>
+            <div className="w-20 font-bold text-sm text-center">Height</div>
           </div>
 
           <div className="flex pb-4 flex-col gap-1 items-center justify-center">
