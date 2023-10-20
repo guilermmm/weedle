@@ -10,13 +10,13 @@ type Props = {
 const Tip = ({ boolean, number, type, children }: Props) => {
   return (
     <div
-      className={cn("relative w-20 h-20 rounded-lg border-[#421856] border-r-4 border-b-4", {
+      className={cn("relative w-20 h-24 rounded-lg border-[#421856] border-r-4 border-b-4", {
         "bg-[#4CBB6B]": boolean === true || number?.value === "equal" || type === "completely",
         "bg-[#E3C559]": number?.proximity === "close" || type === "partially",
         "bg-[#9F898F]": boolean === false || number?.proximity === "far" || type === "not",
       })}
     >
-      <div className="flex flex-col h-full w-full font-bold items-center p-1 justify-center">
+      <div className="flex flex-col h-full w-full font-bold items-center p-1 justify-center pb-2">
         {children}
       </div>
 
