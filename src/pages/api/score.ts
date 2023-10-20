@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { auth } from "../../server/auth";
-import { prisma } from "../../server/db";
+import { auth } from "../../util/auth";
+import { prisma } from "../../util/db";
 import { z } from "zod";
 
 const updateSchema = z.object({
