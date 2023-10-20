@@ -6,6 +6,7 @@ import axios from "axios";
 import Tip from "../components/Tip";
 import FullPage from "../components/FullPage";
 import { useSession } from "next-auth/react";
+import { Combobox } from "../components/ComboBox";
 
 async function getPokemon() {
   return axios.get<{ pokemon: number }>("/api/daily").then(res => res.data.pokemon);
@@ -177,11 +178,10 @@ const Home = () => {
             }
           }}
         >
-          <input
-            className="grow px-2 outline-none"
-            type="text"
+          <Combobox
             value={input}
-            onChange={e => setInput(e.target.value)}
+            onChange={e => setInput(e)}
+            disabled={!(!guessedCorrectly && guesses[5] == null)}
           />
           <button
             className="py-1 px-2 gap-1 items-center disabled:opacity-50 flex bg-[#FD1B54] rounded-xl border-[#421856] border-r-4 border-b-4"
