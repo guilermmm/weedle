@@ -215,7 +215,7 @@ const Home = () => {
         </div>
       )}
 
-      {guesses[5] != null && (
+      {guesses[5] != null && !guessedCorrectly && (
         <>
           <div className="font-bold text-lg">You lose!</div>
           {session.data ? (
